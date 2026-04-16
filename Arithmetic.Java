@@ -1,5 +1,16 @@
 package com.example;
-public class Arithmetic {
-    public int add(int a, int b) { return a + b; }
-    public int subtract(int a, int b) { return a - b; }
+
+public class App {
+    public static String checkNumber(int num) {
+        if (num % 2 == 0) {
+            return "Even";
+        } else {
+            return "Odd";
+        }
+    }
+
+    public static void main(String[] args) {
+        int number = 5;
+        System.out.println(number + " is " + checkNumber(number));
+    }
 }
