@@ -1,9 +1,17 @@
 package com.example;
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 
-public class ArithmeticTest {
-    Arithmetic calc = new Arithmetic();
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class AppTest {
+
     @Test
-    public void testAdd() { assertEquals(5, calc.add(2, 3)); }
+    void testEven() {
+        assertEquals("Even", App.checkNumber(4));
+    }
+
+    @Test
+    void testOdd() {
+        assertEquals("Odd", App.checkNumber(5));
+    }
 }
