@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: even-odd-app
+  labels:
+    app: even-odd-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: even-odd-app
@@ -13,8 +15,20 @@ spec:
         app: even-odd-app
     spec:
       containers:
-      - name: even-odd-container
+      - name: even-odd-app
         image: 23mis0471/even-odd-app:latest
-        imagePullPolicy: Always
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: even-odd-service
+spec:
+  selector:
+    app: even-odd-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
