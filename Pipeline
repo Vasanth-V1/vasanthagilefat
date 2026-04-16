@@ -1,1 +1,39 @@
-
+pipeline {
+    agent any
+    environment {
+        DOCKER_IMAGE = "23mis0471/arithmetic-app:${env.BUILD_NUMBER}"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                script {
+                    dockerImage = docker.build("${DOCKER_IMAGE}")
+                }
+            }
+        }
+        stage('Push to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('', 'docker-hub-creds') {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+    }
+}
