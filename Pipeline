@@ -1,37 +1,62 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE = "23mis0471/arithmetic-app:${env.BUILD_NUMBER}"
+        DOCKER_IMAGE = "23mis0471/even-odd-app:latest"
     }
+
     stages {
-        stage('Checkout') {
+
+        stage('Clone Repository') {
             steps {
-                git 'https://github.com'
+                git branch: 'main',
+                    url: 'https://github.com/Vasanth-V1/agilefat.git'
             }
         }
-        stage('Test') {
+
+        stage('Build & Run Tests') {
             steps {
-                sh 'mvn test'
+                bat 'mvn clean test'
             }
-        }
-        stage('Build') {
-            steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-        stage('Docker Build') {
-            steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}")
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
                 }
             }
         }
-        stage('Push to Docker Hub') {
+
+        stage('Package Application') {
             steps {
-                script {
-                    docker.withRegistry('', 'docker-hub-creds') {
-                        dockerImage.push()
-                    }
+                bat 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat "docker build -t %DOCKER_IMAGE% ."
+            }
+        }
+
+        stage('Push to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat """
+                        docker login -u %DOCKER_USER% -p %DOCKER_PASS%
+                        docker push %DOCKER_IMAGE%
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                // We use withKubeConfig to temporarily provide the credential to kubectl
+                withKubeConfig([credentialsId: 'kubeconfig-lab']) {
+                    bat 'kubectl apply -f deployment.yaml'
                 }
             }
         }
