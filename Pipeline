@@ -54,7 +54,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                // We use withKubeConfig to temporarily provide the credential to kubectl
+                
                 withKubeConfig([credentialsId: 'kubeconfig-lab']) {
                     bat 'kubectl apply -f deployment.yaml'
                 }
